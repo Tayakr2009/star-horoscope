@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>星象密码 | AI星座趣味解读</title>
+  <!-- 引入外部资源 -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
+  
+  <!-- 配置Tailwind CSS -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#8B5CF6', // 主色调：紫色
+            secondary: '#EC4899', // 辅助色：粉色
+            accent: '#06B6D4', // 强调色：青色
+            dark: '#0F172A', // 深色背景
+            light: '#F8FAFC' // 浅色文本
+          },
+          fontFamily: {
+            inter: ['Inter', 'system-ui', 'sans-serif'],
+          },
+        },
+      }
+    }
+  </script>
+  
+  <!-- 自定义工具类 -->
+  <style type="text/tailwindcss">
+    @layer utilities {
+      .content-auto {
+        content-visibility: auto;
+      }
+      .text-shadow {
+        text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      }
+      .text-gradient {
+        background-clip: text;
+        -webkit-background-clip: text;
+        color: transparent;
+      }
+      .bg-glass {
+        backdrop-filter: blur(10px);
+        background-color: rgba(255,255,255,0.1);
+      }
+      .animate-float {
+        animation: float 6s ease-in-out infinite;
+      }
+      .animate-pulse-slow {
+        animation: pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+      }
+    }
+  </style>
+  
+  <style>
+    /* 基础样式 */
+    body {
+      background-color: #0F172A;
+      background-image: 
+        radial-gradient(circle at 25% 10%, rgba(139, 92, 246, 0.1) 0%, transparent 25%),
+        radial-gradient(circle at 75% 30%, rgba(236, 72, 153, 0.1) 0%, transparent 25%),
+        radial-gradient(circle at 40% 70%, rgba(6, 182, 212, 0.1) 0%, transparent 30%);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+    
+    /* 星星动画 */
+    .stars {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+    }
+    
+    .star {
+      position: absolute;
+      background-color: white;
+      border-radius: 50%;
+      animation: twinkle 3s infinite alternate;
+    }
+    
+    /* 动画定义 */
+    @keyframes float {
+      0% { transform: translateY(0px); }
+      50% { transform: translateY(-15px); }
+      100% { transform: translateY(0px); }
+    }
+    
+    @keyframes twinkle {
+      0% { opacity: 0.2; }
+      100% { opacity: 1; }
+    }
+    
+    /* 滚动条美化 */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+    
+    ::-webkit-scrollbar-track {
+      background: rgba(15, 23, 42, 0.5);
+    }
+    
+    ::-webkit-scrollbar-thumb {
+      background: rgba(139, 92, 246, 0.5);
+      border-radius: 4px;
+    }
+    
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(139, 92, 246, 0.8);
+    }
+  </style>
+</head>
+
+<body class="font-inter text-light antialiased">
+  <!-- 星星背景 -->
+  <div class="stars" id="stars"></div>
+  
+  <!-- 页面容器 -->
+  <div class="relative z-10 container mx-auto px-4 py-8 md:py-12">
+    <!-- 导航栏 -->
+    <nav class="flex justify-between items-center mb-12">
+      <div class="flex items-center space-x-2">
+        <div class="w-10 h-10 rounded-full bg-gradient-to-r from-primary to-secondary flex items-center justify-center">
+          <i class="fa fa-star text-xl"></i>
+        </div>
+        <h1 class="text-2xl font-bold bg-gradient-to-r from-primary to-secondary text-gradient">星象密码</h1>
+      </div>
+      
+      <div class="hidden md:flex items-center space-x-8">
+        <a href="#" class="hover:text-primary transition-colors duration-300">首页</a>
+        <a href="#" class="hover:text-primary transition-colors duration-300">星座大全</a>
+        <a href="#" class="hover:text-primary transition-colors duration-300">AI解读</a>
+        <a href="#" class="hover:text-primary transition-colors duration-300">关于我们</a>
+      </div>
+      
+      <button class="md:hidden text-xl">
+        <i class="fa fa-bars"></i>
+      </button>
+    </nav>
+    
+    <!-- 主要内容区 -->
+    <main class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+      <!-- 左侧：介绍与表单 -->
+      <div class="space-y-8 animate-fade-in">
+        <div class="space-y-4">
+          <h2 class="text-[clamp(2rem,5vw,3.5rem)] font-bold leading-tight text-shadow">
+            解锁你的<span class="bg-gradient-to-r from-primary to-secondary text-gradient">星座密码</span>
+          </h2>
+          <p class="text-lg text-gray-300 max-w-lg">
+            由AI驱动的趣味星座解读，揭示你的性格特质、运势走向和隐藏潜能，让星象为你指引方向。
+          </p>
+        </div>
+        
+        <!-- 星座选择表单 -->
+        <div class="bg-glass rounded-2xl p-6 backdrop-blur-md border border-white/10 shadow-xl">
+          <form id="horoscope-form" class="space-y-6">
+            <div>
+              <label class="block text-sm font-medium text-gray-300 mb-2">选择你的星座</label>
+              <div class="grid grid-cols-3 gap-3">
+                <!-- 星座选择按钮 -->
+                <button type="button" class="horoscope-btn py-3 px-4 rounded-xl border border-white/10 hover:border-primary hover:bg-primary/10 transition-all duration-300 flex flex-col items-center" data-sign="aries">
+                  <i class="fa fa-fire text-secondary text-xl mb-1"></i>
+                  <span>白羊座</span>
+                </button>
+                <button type="button" class="horoscope-btn py-3 px-4 rounded-xl border border-white/10 hover:border-primary hover:bg-primary/10 transition-all duration-300 flex flex-col items-center" data-sign="taurus">
+                  <i class="fa fa-bull text-accent text-xl mb-1"></i>
+                  <span>金牛座</span>
+                </button>
+                <button type="button" class="horoscope-btn py-3 px-4 rounded-xl border border-white/10 hover:border-primary hover:bg-primary/10 transition-all duration-300 flex flex-col items-center" data-sign="gemini">
+                  <i class="fa fa-sign-language text-primary text-xl mb-1"></i>
+                  <span>双子座</span>
+                </button>
+                <button type="button" class="horoscope-btn py-3 px-4 rounded-xl border border-white/10 hover:border-primary hover:bg-primary/10 transition-all duration-300 flex flex-col items-center" data-sign="cancer">
+                  <i class="fa fa-water text-blue-400 text-xl mb-1"></i>
+                  <span>巨蟹座</span>
+                </button>
+                <button type="button" class="horoscope-btn py-3 px-4 rounded-xl border border-white/10 hover:border-primary hover:bg-primary/10 transition-all duration-300 flex flex-col items-center" data-sign="leo">
+                  <i class="fa fa-sun-o text-yellow-400 text-xl mb-1"></i>
+                  <span>狮子座</span>
+                </button>
+                <button type="button" class="horoscope-btn py-3 px-4 rounded-xl border border-white/10 hover:border-primary hover:bg-primary/10 transition-all duration-300 flex flex-col items-center" data-sign="virgo">
+                  <i class="fa fa-leaf text-green-400 text-xl mb-1"></i>
+                  <span>处女座</span>
+                </button>
+                <button type="button" class="horoscope-btn py-3 px-4 rounded-xl border border-white/10 hover:border-primary hover:bg-primary/10 transition-all duration-300 flex flex-col items-center" data-sign="libra">
+                  <i class="fa fa-balance-scale text-purple-300 text-xl mb-1"></i>
+                  <span>天秤座</span>
+                </button>
+                <button type="button" class="horoscope-btn py-3 px-4 rounded-xl border border-white/10 hover:border-primary hover:bg-primary/10 transition-all duration-300 flex flex-col items-center" data-sign="scorpio">
+                  <i class="fa fa-scissors text-red-400 text-xl mb-1"></i>
+                  <span>天蝎座</span>
+                </button>
+                <button type="button" class="horoscope-btn py-3 px-4 rounded-xl border border-white/10 hover:border-primary hover:bg-primary/10 transition-all duration-300 flex flex-col items-center" data-sign="sagittarius">
+                  <i class="fa fa-arrow-up text-orange-400 text-xl mb-1"></i>
+                  <span>射手座</span>
+                </button>
+                <button type="button" class="horoscope-btn py-3 px-4 rounded-xl border border-white/10 hover:border-primary hover:bg-primary/10 transition-all duration-300 flex flex-col items-center" data-sign="capricorn">
+                  <i class="fa fa-mountain text-gray-400 text-xl mb-1"></i>
+                  <span>摩羯座</span>
+                </button>
+                <button type="button" class="horoscope-btn py-3 px-4 rounded-xl border border-white/10 hover:border-primary hover:bg-primary/10 transition-all duration-300 flex flex-col items-center" data-sign="aquarius">
+                  <i class="fa fa-tint text-cyan-400 text-xl mb-1"></i>
+                  <span>水瓶座</span>
+                </button>
+                <button type="button" class="horoscope-btn py-3 px-4 rounded-xl border border-white/10 hover:border-primary hover:bg-primary/10 transition-all duration-300 flex flex-col items-center" data-sign="pisces">
+                  <i class="fa fa-fish text-pink-400 text-xl mb-1"></i>
+                  <span>双鱼座</span>
+                </button>
+              </div>
+            </div>
+            
+            <div>
+              <label class="block text-sm font-medium text-gray-300 mb-2">想了解的方向</label>
+              <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                <label class="flex flex-col items-center p-3 rounded-xl border border-white/10 hover:border-primary hover:bg-primary/10 transition-all duration-300 cursor-pointer">
+                  <input type="checkbox" name="focus" value="personality" class="hidden">
+                  <i class="fa fa-user text-xl mb-1"></i>
+                  <span class="text-sm">性格特质</span>
+                </label>
+                <label class="flex flex-col items-center p-3 rounded-xl border border-white/10 hover:border-primary hover:bg-primary/10 transition-all duration-300 cursor-pointer">
+                  <input type="checkbox" name="focus" value="love" class="hidden">
+                  <i class="fa fa-heart text-secondary text-xl mb-1"></i>
+                  <span class="text-sm">爱情运势</span>
+                </label>
+                <label class="flex flex-col items-center p-3 rounded-xl border border-white/10 hover:border-primary hover:bg-primary/10 transition-all duration-300 cursor-pointer">
+                  <input type="checkbox" name="focus" value="career" class="hidden">
+                  <i class="fa fa-briefcase text-accent text-xl mb-1"></i>
+                  <span class="text-sm">事业发展</span>
+                </label>
+                <label class="flex flex-col items-center p-3 rounded-xl border border-white/10 hover:border-primary hover:bg-primary/10 transition-all duration-300 cursor-pointer">
+                  <input type="checkbox" name="focus" value="luck" class="hidden">
+                  <i class="fa fa-star text-yellow-400 text-xl mb-1"></i>
+                  <span class="text-sm">今日好运</span>
+                </label>
+              </div>
+            </div>
+            
+            <button type="submit" class="w-full py-4 rounded-xl bg-gradient-to-r from-primary to-secondary text-white font-medium hover:shadow-lg hover:shadow-primary/20 transition-all duration-300 flex items-center justify-center space-x-2">
+              <i class="fa fa-magic"></i>
+              <span>生成AI趣味解读</span>
+            </button>
+          </form>
+        </div>
+        
+        <!-- 特色标签 -->
+        <div class="flex flex-wrap gap-3">
+          <span class="px-4 py-2 rounded-full bg-white/5 text-sm flex items-center space-x-1">
+            <i class="fa fa-check text-primary"></i>
+            <span>AI智能分析</span>
+          </span>
+          <span class="px-4 py-2 rounded-full bg-white/5 text-sm flex items-center space-x-1">
+            <i class="fa fa-check text-primary"></i>
+            <span>趣味解读</span>
+          </span>
+          <span class="px-4 py-2 rounded-full bg-white/5 text-sm flex items-center space-x-1">
+            <i class="fa fa-check text-primary"></i>
+            <span>每日更新</span>
+          </span>
+          <span class="px-4 py-2 rounded-full bg-white/5 text-sm flex items-center space-x-1">
+            <i class="fa fa-check text-primary"></i>
+            <span>分享好友</span>
+          </span>
+        </div>
+      </div>
+      
+      <!-- 右侧：结果展示区 -->
+      <div id="result-container" class="hidden space-y-6">
+        <!-- 星座卡片 -->
+        <div class="bg-glass rounded-2xl p-6 backdrop-blur-md border border-white/10 shadow-xl animate-float">
+          <div class="flex justify-between items-start mb-6">
+            <div>
+              <h3 class="text-2xl font-bold" id="result-sign">白羊座</h3>
+              <p class="text-gray-400 text-sm" id="result-date">3月21日 - 4月19日</p>
+            </div>
+            <div class="w-12 h-12 rounded-full bg-gradient-to-r from-primary to-secondary flex items-center justify-center" id="result-icon">
+              <i class="fa fa-fire text-xl"></i>
+            </div>
+          </div>
+          
+          <!-- 解读内容 -->
+          <div class="space-y-4 mb-6" id="result-content">
+            <p class="text-gray-200 leading-relaxed">
+              今天的你充满活力和创造力！白羊座的冒险精神将指引你突破自我设限，尝试新的事物会带来意想不到的收获。
+            </p>
+            <p class="text-gray-200 leading-relaxed">
+              在人际关系方面，你的直率和热情会吸引志同道合的朋友，但也要注意控制脾气，避免不必要的冲突。
+            </p>
+          </div>
+          
+          <!-- 运势图表 -->
+          <div class="bg-white/5 rounded-xl p-4 mb-6">
+            <h4 class="text-sm font-medium text-gray-300 mb-3">今日运势分布</h4>
+            <canvas id="luck-chart" height="180"></canvas>
+          </div>
+          
+          <!-- 幸运提示 -->
+          <div class="grid grid-cols-2 gap-4 mb-6">
+            <div class="bg-white/5 rounded-xl p-4">
+              <h4 class="text-sm font-medium text-gray-300 mb-2 flex items-center">
+                <i class="fa fa-heart text-secondary mr-2"></i>幸运颜色
+              </h4>
+              <p class="text-white font-medium" id="luck-color">红色</p>
+            </div>
+            <div class="bg-white/5 rounded-xl p-4">
+              <h4 class="text-sm font-medium text-gray-300 mb-2 flex items-center">
+                <i class="fa fa-number text-accent mr-2"></i>幸运数字
+              </h4>
+              <p class="text-white font-medium" id="luck-number">7</p>
+            </div>
+            <div class="bg-white/5 rounded-xl p-4">
+              <h4 class="text-sm font-medium text-gray-300 mb-2 flex items-center">
+                <i class="fa fa-cutlery text-primary mr-2"></i>幸运食物
+              </h4>
+              <p class="text-white font-medium" id="luck-food">辛辣美食</p>
+            </div>
+            <div class="bg-white/5 rounded-xl p-4">
+              <h4 class="text-sm font-medium text-gray-300 mb-2 flex items-center">
+                <i class="fa fa-users text-green-400 mr-2"></i>速配星座
+              </h4>
+              <p class="text-white font-medium" id="luck-match">狮子座、射手座</p>
+            </div>
+          </div>
+          
+          <!-- 操作按钮 -->
+          <div class="flex space-x-3">
+            <button class="flex-1 py-3 rounded-xl bg-white/5 hover:bg-white/10 transition-all duration-300 flex items-center justify-center space-x-2">
+              <i class="fa fa-refresh"></i>
+              <span>重新生成</span>
+            </button>
+            <button class="flex-1 py-3 rounded-xl bg-gradient-to-r from-primary to-secondary text-white hover:shadow-lg hover:shadow-primary/20 transition-all duration-300 flex items-center justify-center space-x-2">
+              <i class="fa fa-share-alt"></i>
+              <span>分享解读</span>
+            </button>
+          </div>
+        </div>
+        
+        <!-- 相关推荐 -->
+        <div>
+          <h3 class="text-xl font-bold mb-4">相关星座推荐</h3>
+          <div class="grid grid-cols-2 gap-3">
+            <div class="bg-white/5 rounded-xl p-4 hover:bg-white/10 transition-all duration-300 cursor-pointer">
+              <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-full bg-secondary/20 flex items-center justify-center">
+                  <i class="fa fa-heart text-secondary"></i>
+                </div>
+                <div>
+                  <h4 class="font-medium">白羊座本周爱情运势</h4>
+                  <p class="text-xs text-gray-400">甜蜜指数飙升</p>
+                </div>
+              </div>
+            </div>
+            <div class="bg-white/5 rounded-xl p-4 hover:bg-white/10 transition-all duration-300 cursor-pointer">
+              <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-full bg-accent/20 flex items-center justify-center">
+                  <i class="fa fa-briefcase text-accent"></i>
+                </div>
+                <div>
+                  <h4 class="font-medium">白羊座职场生存指南</h4>
+                  <p class="text-xs text-gray-400">发挥你的领导力</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- 右侧初始状态 -->
+      <div id="initial-right" class="flex flex-col items-center justify-center space-y-8 text-center">
+        <div class="w-40 h-40 rounded-full bg-gradient-to-r from-primary/20 to-secondary/20 flex items-center justify-center animate-pulse-slow">
+          <i class="fa fa-star text-5xl bg-gradient-to-r from-primary to-secondary text-gradient"></i>
+        </div>
+        <div class="space-y-3">
+          <h3 class="text-2xl font-bold">选择你的星座</h3>
+          <p class="text-gray-400 max-w-md">
+            从左侧选择你的星座和感兴趣的方向，AI将为你生成专属的趣味解读
+          </p>
+        </div>
+        <div class="flex space-x-2">
+          <span class="w-3 h-3 rounded-full bg-primary animate-pulse"></span>
+          <span class="w-3 h-3 rounded-full bg-secondary animate-pulse" style="animation-delay: 0.5s"></span>
+          <span class="w-3 h-3 rounded-full bg-accent animate-pulse" style="animation-delay: 1s"></span>
+        </div>
+      </div>
+    </main>
+    
+    <!-- 页脚 -->
+    <footer class="mt-20 pt-10 border-t border-white/10">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div>
+          <div class="flex items-center space-x-2 mb-4">
+            <div class="w-8 h-8 rounded-full bg-gradient-to-r from-primary to-secondary flex items-center justify-center">
+              <i class="fa fa-star"></i>
+            </div>
+            <h3 class="text-xl font-bold bg-gradient-to-r from-primary to-secondary text-gradient">星象密码</h3>
+          </div>
+          <p class="text-gray-400 text-sm mb-4">
+            用AI技术打造的趣味星座解读平台，让星象指引你的生活，带来更多乐趣和启发。
+          </p>
+          <div class="flex space-x-4">
+            <a href="#" class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center hover:bg-primary/20 transition-all duration-300">
+              <i class="fa fa-weibo"></i>
+            </a>
+            <a href="#" class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center hover:bg-primary/20 transition-all duration-300">
+              <i class="fa fa-wechat"></i>
+            </a>
+            <a href="#" class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center hover:bg-primary/20 transition-all duration-300">
+              <i class="fa fa-instagram"></i>
+            </a>
+          </div>
+        </div>
+        
+        <div>
+          <h4 class="text-lg font-medium mb-4">快速链接</h4>
+          <ul class="space-y-2 text-gray-400">
+            <li><a href="#" class="hover:text-primary transition-colors duration-300">关于我们</a></li>
+            <li><a href="#" class="hover:text-primary transition-colors duration-300">星座知识库</a></li>
+            <li><a href="#" class="hover:text-primary transition-colors duration-300">用户反馈</a></li>
+            <li><a href="#" class="hover:text-primary transition-colors duration-300">隐私政策</a></li>
+            <li><a href="#" class="hover:text-primary transition-colors duration-300">服务条款</a></li>
+          </ul>
+        </div>
+        
+        <div>
+          <h4 class="text-lg font-medium mb-4">订阅更新</h4>
+          <p class="text-gray-400 text-sm mb-4">
+            订阅我们的 newsletter，获取最新的星座解读和运势分析
+          </p>
+          <div class="flex">
+            <input type="email" placeholder="你的邮箱地址" class="flex-1 py-2 px-4 rounded-l-xl bg-white/5 border border-white/10 focus:outline-none focus:border-primary text-white">
+            <button class="bg-primary hover:bg-primary/90 transition-colors duration-300 py-2 px-4 rounded-r-xl">
+              <i class="fa fa-paper-plane"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+      
+      <div class="mt-10 pt-6 border-t border-white/10 text-center text-gray-500 text-sm">
+        <p>© 2025 星象密码 - 仅供娱乐，请勿轻信</p>
+      </div>
+    </footer>
+  </div>
+  
+  <!-- JavaScript -->
+  <script>
+    // 创建星星背景
+    function createStars() {
+      const starsContainer = document.getElementById('stars');
+      const starCount = 150;
+      
+      for (let i = 0; i < starCount; i++) {
+        const star = document.createElement('div');
+        star.classList.add('star');
+        
+        // 随机位置、大小和动画延迟
+        const size = Math.random() * 3 + 1;
+        const left = Math.random() * 100;
+        const top = Math.random() * 100;
+        const delay = Math.random() * 5;
+        
+        star.style.width = `${size}px`;
+        star.style.height = `${size}px`;
+        star.style.left = `${left}%`;
+        star.style.top = `${top}%`;
+        star.style.animationDelay = `${delay}s`;
+        
+        starsContainer.appendChild(star);
+      }
+    }
+    
+    // 星座数据
+    const horoscopeData = {
+      aries: {
+        name: '白羊座',
+        date: '3月21日 - 4月19日',
+        icon: 'fa-fire',
+        color: 'text-secondary',
+        descriptions: {
+          personality: '白羊座的你热情似火、充满活力，有着天生的领导力和冒险精神。你勇往直前，从不畏惧挑战，但有时也会显得冲动急躁。',
+          love: '在爱情中，你直接坦率，喜欢轰轰烈烈的感情。你需要一个能与你并肩作战、共同冒险的伴侣，平淡的感情会让你感到乏味。',
+          career: '职场上的你积极主动，富有创造力，适合需要领导力和创新思维的工作。你不喜欢被束缚，创业或独立负责项目会让你大放异彩。',
+          luck: '今天的你贵人运极佳，遇到困难时会有人主动伸出援手。大胆表达自己的想法，会得到意想不到的支持和认可。'
+        },
+        luck: {
+          color: '红色',
+          number: '7',
+          food: '辛辣美食',
+          match: '狮子座、射手座'
+        }
+      },
+      taurus: {
+        name: '金牛座',
+        date: '4月20日 - 5月20日',
+        icon: 'fa-bull',
+        color: 'text-accent',
+        descriptions: {
+          personality: '金牛座的你稳重可靠、踏实务实，有着强烈的责任感和耐心。你追求安全感和舒适的生活，对美有独特的鉴赏力。',
+          love: '在爱情中，你忠诚专一，一旦投入就会全心全意。你不擅长甜言蜜语，但会用实际行动表达爱意，是值得托付终身的伴侣。',
+          career: '你做事认真负责，注重细节，适合需要耐心和毅力的工作。金融、艺术、美食相关领域会让你发挥所长，获得成就感。',
+          luck: '今天的你财运亨通，投资理财会有不错的回报。保持稳健的态度，避免冲动决策，好运会一直伴随你。'
+        },
+        luck: {
+          color: '绿色',
+          number: '6',
+          food: '甜品蛋糕',
+          match: '处女座、摩羯座'
+        }
+      },
+      // 可以继续添加其他星座数据
+      gemini: {
+        name: '双子座',
+        date: '5月21日 - 6月21日',
+        icon: 'fa-sign-language',
+        color: 'text-primary',
+        descriptions: {
+          personality: '双子座的你聪明机智、善于沟通，有着丰富的好奇心和创造力。你适应能力强，能快速融入各种环境，但有时会显得不够专注。',
+          love: '在爱情中，你浪漫多情，喜欢新鲜感和 intellectual 的交流。你需要一个能与你精神契合、一起探索世界的伴侣。',
+          career: '你口才出众，思维敏捷，适合公关、媒体、教育等需要沟通能力的工作。多元化的工作环境会让你保持热情和动力。',
+          luck: '今天的你思维清晰，学习和沟通能力达到顶峰。适合参加培训、谈判或发表演讲，会有出色的表现。'
+        },
+        luck: {
+          color: '黄色',
+          number: '5',
+          food: '水果沙拉',
+          match: '天秤座、水瓶座'
+        }
+      }
+    };
+    
+    // 初始化运势图表
+    let luckChart;
+    function initLuckChart(data) {
+      const ctx = document.getElementById('luck-chart').getContext('2d');
+      
+      if (luckChart) {
+        luckChart.destroy();
+      }
+      
+      luckChart = new Chart(ctx, {
+        type: 'radar',
+        data: {
+          labels: ['爱情', '事业', '财运', '健康', '人际关系'],
+          datasets: [{
+            label: '今日运势',
+            data: data,
+            backgroundColor: 'rgba(139, 92, 246, 0.2)',
+            borderColor: 'rgba(139, 92, 246, 1)',
+            borderWidth: 2,
+            pointBackgroundColor: 'rgba(139, 92, 246, 1)',
+            pointRadius: 4,
+            pointHoverRadius: 6
+          }]
+        },
+        options: {
+          scales: {
+            r: {
+              angleLines: {
+                color: 'rgba(255, 255, 255, 0.1)'
+              },
+              grid: {
+                color: 'rgba(255, 255, 255, 0.1)'
+              },
+              pointLabels: {
+                color: 'rgba(255, 255, 255, 0.7)',
+                font: {
+                  size: 11
+                }
+              },
+              ticks: {
+                color: 'rgba(255, 255, 255, 0.5)',
+                backdropColor: 'transparent',
+                stepSize: 20
+              },
+              suggestedMin: 0,
+              suggestedMax: 100
+            }
+          },
+          plugins: {
+            legend: {
+              display: false
+            }
+          },
+          elements: {
+            line: {
+              tension: 0.2
+            }
+          }
+        }
+      });
+    }
+    
+    // 生成随机运势数据
+    function generateRandomLuckData() {
+      return [
+        Math.floor(Math.random() * 40) + 60, // 爱情
+        Math.floor(Math.random() * 40) + 60, // 事业
+        Math.floor(Math.random() * 40) + 60, // 财运
+        Math.floor(Math.random() * 40) + 60, // 健康
+        Math.floor(Math.random() * 40) + 60  // 人际关系
+      ];
+    }
+    
+    // 页面加载完成后执行
+    document.addEventListener('DOMContentLoaded', function() {
+      // 创建星星背景
+      createStars();
+      
+      // 星座选择按钮点击事件
+      const horoscopeBtns = document.querySelectorAll('.horoscope-btn');
+      let selectedSign = null;
+      
+      horoscopeBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+          // 移除其他按钮的选中状态
+          horoscopeBtns.forEach(b => {
+            b.classList.remove('border-primary', 'bg-primary/10');
+          });
+          
+          // 添加当前按钮的选中状态
+          this.classList.add('border-primary', 'bg-primary/10');
+          
+          // 记录选中的星座
+          selectedSign = this.getAttribute('data-sign');
+        });
+      });
+      
+      // 表单提交事件
+      const form = document.getElementById('horoscope-form');
+      form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        // 检查是否选择了星座
+        if (!selectedSign) {
+          alert('请选择你的星座');
+          return;
+        }
+        
+        // 获取选中的兴趣方向
+        const selectedFocus = Array.from(document.querySelectorAll('input[name="focus"]:checked'))
+          .map(input => input.value);
+        
+        // 如果没有选择兴趣方向，默认选择所有
+        const focusToUse = selectedFocus.length > 0 ? selectedFocus : ['personality', 'love', 'career', 'luck'];
+        
+        // 获取星座数据（如果没有对应数据，使用白羊座作为默认）
+        const signData = horoscopeData[selectedSign] || horoscopeData.aries;
+        
+        // 更新结果区域
+        document.getElementById('result-sign').textContent = signData.name;
+        document.getElementById('result-date').textContent = signData.date;
+        
+        const iconElement = document.getElementById('result-icon').querySelector('i');
+        iconElement.className = `fa ${signData.icon} text-xl ${signData.color}`;
+        
+        // 更新解读内容
+        const contentElement = document.getElementById('result-content');
+        contentElement.innerHTML = '';
+        
+        focusToUse.forEach(focus => {
+          const p = document.createElement('p');
+          p.className = 'text-gray-200 leading-relaxed';
+          p.textContent = signData.descriptions[focus];
+          contentElement.appendChild(p);
+        });
+        
+        // 更新幸运信息
+        document.getElementById('luck-color').textContent = signData.luck.color;
+        document.getElementById('luck-number').textContent = signData.luck.number;
+        document.getElementById('luck-food').textContent = signData.luck.food;
+        document.getElementById('luck-match').textContent = signData.luck.match;
+        
+        // 生成并更新运势图表
+        const luckData = generateRandomLuckData();
+        initLuckChart(luckData);
+        
+        // 显示结果区域，隐藏初始状态
+        document.getElementById('initial-right').classList.add('hidden');
+        document.getElementById('result-container').classList.remove('hidden');
+        
+        // 平滑滚动到结果区域
+        document.getElementById('result-container').scrollIntoView({
+          behavior: 'smooth'
+        });
+      });
+      
+      // 重新生成按钮点击事件
+      document.querySelector('#result-container button:first-of-type').addEventListener('click', function() {
+        // 生成新的运势数据
+        const newLuckData = generateRandomLuckData();
+        initLuckChart(newLuckData);
+        
+        // 轻微抖动效果，提示更新完成
+        const resultCard = document.querySelector('#result-container .bg-glass');
+        resultCard.classList.add('animate-shake');
+        setTimeout(() => {
+          resultCard.classList.remove('animate-shake');
+        }, 500);
+      });
+      
+      // 分享按钮点击事件
+      document.querySelector('#result-container button:last-of-type').addEventListener('click', function() {
+        alert('分享功能即将上线，敬请期待！');
+      });
+      
+      // 兴趣方向选择
+      const focusLabels = document.querySelectorAll('label:has(input[name="focus"])');
+      focusLabels.forEach(label => {
+        const input = label.querySelector('input');
+        
+        label.addEventListener('click', function() {
+          input.checked = !input.checked;
+          
+          if (input.checked) {
+            label.classList.add('border-primary', 'bg-primary/10');
+          } else {
+            label.classList.remove('border-primary', 'bg-primary/10');
+          }
+        });
+      });
+    });
+  </script>
+</body>
+</html>
